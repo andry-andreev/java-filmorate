@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,38 +22,51 @@ import java.util.Map;
 public class UserManager {
     private static Map<Integer, User> users = new HashMap<>();
     private int currentUserId = 0;
+    private ObjectMapper mapper = new ObjectMapper();
+
+    public UserManager() {
+        mapper.registerModule(new JavaTimeModule());
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+    }
 
     private int getNextUserId() {
-        return currentUserId++;
+        return ++currentUserId;
     }
 
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }
 
-    public ResponseEntity<String> addUser(User user) {
+    public ResponseEntity<String> addUser(User user) throws JsonProcessingException {
         try {
             validateUser(user);
+            setUserId(user);
             users.put(user.getId(), user);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .build();
+                    .body(mapper.writeValueAsString(user));
+
         } catch (ValidationException e) {
             log.error("Ошибка валидации: " + e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
+                    .body(e.toJson());
         }
     }
 
-    public ResponseEntity<String> updateUser(int id, User user) {
+    public ResponseEntity<String> updateUser(int id, User user) throws JsonProcessingException {
         try {
-            user.setId(id);
-            validateUser(user);
-            users.put(id, user);
-            return ResponseEntity
-                    .status(HttpStatus.NO_CONTENT)
-                    .build();
+            if (users.containsKey(id)) {
+                user.setId(id);
+                validateUser(user);
+                users.put(id, user);
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(mapper.writeValueAsString(user));
+            } else return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("{}");
+
         } catch (ValidationException e) {
             log.error("Ошибка валидации: " + e.getMessage());
             return ResponseEntity

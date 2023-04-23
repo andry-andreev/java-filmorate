@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,15 +23,15 @@ public class FilmController {
     }
 
     @PostMapping
-    public ResponseEntity<String> addFilm(@Valid @RequestBody Film film) {
-        filmManager.setFilmId(film);
+    public ResponseEntity<String> addFilm(@Valid @RequestBody Film film) throws JsonProcessingException {
         ResponseEntity<String> response = filmManager.addFilm(film);
         return response;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateFilm(@PathVariable Integer id, @Valid @RequestBody Film film) {
-        ResponseEntity<String> response = filmManager.updateFilm(id, film);
+    @PutMapping
+    public ResponseEntity<String> updateFilm(@Valid @RequestBody Film film)
+            throws JsonProcessingException {
+        ResponseEntity<String> response = filmManager.updateFilm(film.getId(), film);
         return response;
     }
 }

@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,38 +22,45 @@ import java.util.Map;
 public class FilmManager {
     private static Map<Integer, Film> films = new HashMap<>();
     private int currentFilmId = 0;
+    private ObjectMapper mapper = new ObjectMapper();
+
+    public FilmManager() {
+        mapper.registerModule(new JavaTimeModule());
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+    }
 
     private int getNextFilmId() {
-        return currentFilmId++;
+        return ++currentFilmId;
     }
 
     public List<Film> getAllFilms() {
         return new ArrayList<>(films.values());
     }
 
-    public ResponseEntity<String> addFilm(Film film) {
+    public ResponseEntity<String> addFilm(Film film) throws JsonProcessingException {
         try {
             validateFilm(film);
+            setFilmId(film);
             films.put(film.getId(), film);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .build();
+                    .body(mapper.writeValueAsString(film));
         } catch (ValidationException e) {
             log.error("Ошибка валидации: " + e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
+                    .body(e.toJson());
         }
     }
 
-    public ResponseEntity<String> updateFilm(int id, Film film) {
+    public ResponseEntity<String> updateFilm(int id, Film film) throws JsonProcessingException {
         try {
             film.setId(id);
             validateFilm(film);
             films.put(id, film);
             return ResponseEntity
-                    .status(HttpStatus.NO_CONTENT)
-                    .build();
+                    .status(HttpStatus.OK)
+                    .body(mapper.writeValueAsString(film));
         } catch (ValidationException e) {
             log.error("Ошибка валидации: " + e.getMessage());
             return ResponseEntity
