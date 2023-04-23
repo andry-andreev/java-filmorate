@@ -121,7 +121,7 @@ class FilmorateApplicationTests {
 
     @Test
     void testUserNameIsNull() {
-        User user = new User(0, "test@mail.com", "testuserLogin", null,
+        User user = new User(1, "test@mail.com", "testuserLogin", null,
                 LocalDate.of(2000, 1, 1));
         ResponseEntity<String> response = restTemplate.postForEntity("/users", user, String.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -130,7 +130,7 @@ class FilmorateApplicationTests {
             Field usersField = UserManager.class.getDeclaredField("users");
             usersField.setAccessible(true);
             Map<Integer, User> users = (Map<Integer, User>) usersField.get(userManagerTest);
-            assertEquals(users.get(0).getName(), "testuserLogin");
+            assertEquals(users.get(user.getId()).getName(), "testuserLogin");
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
