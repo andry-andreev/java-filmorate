@@ -45,7 +45,6 @@ public class UserManager {
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(mapper.writeValueAsString(user));
-
         } catch (ValidationException e) {
             log.error("Ошибка валидации: " + e.getMessage());
             return ResponseEntity

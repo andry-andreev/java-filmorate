@@ -29,8 +29,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public ResponseEntity<String> updateFilm(@Valid @RequestBody Film film)
-            throws JsonProcessingException {
+    public ResponseEntity<String> updateFilm(@Valid @RequestBody Film film) throws JsonProcessingException {
         ResponseEntity<String> response = filmManager.updateFilm(film.getId(), film);
         return response;
     }

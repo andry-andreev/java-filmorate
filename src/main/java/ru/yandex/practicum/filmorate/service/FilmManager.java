@@ -55,12 +55,17 @@ public class FilmManager {
 
     public ResponseEntity<String> updateFilm(int id, Film film) throws JsonProcessingException {
         try {
-            film.setId(id);
-            validateFilm(film);
-            films.put(id, film);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(mapper.writeValueAsString(film));
+            if (films.containsKey(id)) {
+                film.setId(id);
+                validateFilm(film);
+                films.put(id, film);
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(mapper.writeValueAsString(film));
+            } else return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("{}");
+
         } catch (ValidationException e) {
             log.error("Ошибка валидации: " + e.getMessage());
             return ResponseEntity
