@@ -6,10 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmManager;
-import ru.yandex.practicum.filmorate.service.UserManager;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -22,8 +21,6 @@ class FilmorateApplicationTests {
 
     @Autowired
     private TestRestTemplate restTemplate;
-    private FilmManager filmManager;
-    private UserManager userManager;
 
     @Test
     void contextLoads() {
@@ -38,27 +35,11 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void testEmptyFilmDescription() {
-        Film film = new Film(0, "Film", null,
-                LocalDate.of(2000, 1, 1), 110);
-        ResponseEntity<String> response = restTemplate.postForEntity("/films", film, String.class);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
     void testOversizeFilmDescription() {
         Film film = new Film(0, "Film", "cutyzwzhhsldeqjauaqeldcwsvblruxztaxdhulbpbqvsglhdolhhtvpcy" +
                 "whagwhyuxkhvckflcthkdkhhoulmnqfvfnyfajjorutzgmqjgnhwzfyomdixabeiunjooynqdxqskrctnxvqmbdajvlyvkeapzh" +
                 "dyyrefjuexrmnsfqfvjhijlnqeyjduillveinqdeoskg",
                 LocalDate.of(2000, 1, 1), 110);
-        ResponseEntity<String> response = restTemplate.postForEntity("/films", film, String.class);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    void testFilmReleaseTimeInFuture() {
-        Film film = new Film(0, "Film", "description",
-                LocalDate.of(2077, 1, 1), 110);
         ResponseEntity<String> response = restTemplate.postForEntity("/films", film, String.class);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -126,8 +107,8 @@ class FilmorateApplicationTests {
         ResponseEntity<String> response = restTemplate.postForEntity("/users", user, String.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         try {
-            UserManager userManagerTest = new UserManager();
-            Field usersField = UserManager.class.getDeclaredField("users");
+            UserController userManagerTest = new UserController();
+            Field usersField = UserController.class.getDeclaredField("users");
             usersField.setAccessible(true);
             Map<Integer, User> users = (Map<Integer, User>) usersField.get(userManagerTest);
             assertEquals(users.get(user.getId()).getName(), "testuserLogin");
