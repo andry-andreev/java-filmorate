@@ -1,11 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exeptions.ValidationException;
+import ru.yandex.practicum.filmorate.exeptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
@@ -14,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -28,42 +25,25 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@Valid @RequestBody User user) {
-        try {
-            validateUser(user);
-            setUserId(user);
-            users.put(user.getId(), user);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(user);
-        } catch (ValidationException e) {
-            log.error("Ошибка валидации: " + e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(e.toJson());
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public User addUser(@Valid @RequestBody User user) {
+        validateUser(user);
+        setUserId(user);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody User user) {
-        try {
-            int id = user.getId();
-            if (users.containsKey(id)) {
-                user.setId(id);
-                validateUser(user);
-                users.put(id, user);
-                return ResponseEntity
-                        .status(HttpStatus.OK)
-                        .body(user);
-            } else return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body("{}");
-
-        } catch (ValidationException e) {
-            log.error("Ошибка валидации: " + e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
+    @ResponseStatus(HttpStatus.OK)
+    public User updateUser(@Valid @RequestBody User user) {
+        int id = user.getId();
+        if (users.containsKey(id)) {
+            user.setId(id);
+            validateUser(user);
+            users.put(id, user);
+            return user;
+        } else {
+            throw new NotFoundException("", id);
         }
     }
 
@@ -76,7 +56,7 @@ public class UserController {
     }
 
     private void validateUser(User user) {
-        if (user.getName() == null) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
     }

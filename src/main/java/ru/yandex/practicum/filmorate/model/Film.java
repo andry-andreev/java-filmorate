@@ -20,12 +20,12 @@ public class Film {
     private int id;
     @NotBlank
     private String name;
+    @NotNull
     @Size(min = 0, max = 200)
     private String description;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @FilmReleaseDate
     private LocalDate releaseDate;
-    @NotNull
     @Positive
     private int duration;
 }
