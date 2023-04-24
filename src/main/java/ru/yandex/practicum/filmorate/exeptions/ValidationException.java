@@ -11,4 +11,8 @@ public class ValidationException extends RuntimeException {
         super(message);
         log.info("Ошибка валидации: {}", message);
     }
+
+    public String toJson() {
+        return "{}";
+    }
 }
