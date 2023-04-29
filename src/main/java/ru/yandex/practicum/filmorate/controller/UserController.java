@@ -1,36 +1,63 @@
 package ru.yandex.practicum.filmorate.controller;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exeptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserManager;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    @Autowired
-    private UserManager userManager;
+
+    private static Map<Integer, User> users = new HashMap<>();
+    private int currentUserId = 0;
 
     @GetMapping
     public List<User> getAllUsers() {
-        return userManager.getAllUsers();
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping
-    public ResponseEntity<String> addUser(@Valid @RequestBody User user) throws JsonProcessingException {
-        ResponseEntity<String> response = userManager.addUser(user);
-        return response;
+    @ResponseStatus(HttpStatus.CREATED)
+    public User addUser(@Valid @RequestBody User user) {
+        validateUser(user);
+        setUserId(user);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @PutMapping
-    public ResponseEntity<String> updateUser(@Valid @RequestBody User user) throws JsonProcessingException {
-        ResponseEntity<String> response = userManager.updateUser(user.getId(), user);
-        return response;
+    @ResponseStatus(HttpStatus.OK)
+    public User updateUser(@Valid @RequestBody User user) {
+        int id = user.getId();
+        if (users.containsKey(id)) {
+            user.setId(id);
+            validateUser(user);
+            users.put(id, user);
+            return user;
+        } else {
+            throw new NotFoundException("", id);
+        }
+    }
+
+    private int getNextUserId() {
+        return ++currentUserId;
+    }
+
+    public void setUserId(User user) {
+        user.setId(getNextUserId());
+    }
+
+    private void validateUser(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }
