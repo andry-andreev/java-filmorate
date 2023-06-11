@@ -32,8 +32,8 @@ public class FilmService {
     public boolean removeLike(int filmId, int userId) {
         Film film = inMemoryFilmStorage.getFilmById(filmId);
         User user = inMemoryUserStorage.getUserById(userId);
-        if (filmLikes.containsKey(film) && filmLikes.containsValue(user)) {
-            filmLikes.get(film).remove(user);
+        if (film != null && user != null) {
+            filmLikes.get(film.getId()).remove(user);
             return true;
         } else {
             return false;
