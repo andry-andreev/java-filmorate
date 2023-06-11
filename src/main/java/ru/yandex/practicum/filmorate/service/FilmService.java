@@ -11,27 +11,7 @@ import java.util.*;
 
 @Service
 public class FilmService {
-    /*Создайте FilmService, который будет отвечать за операции с фильмами,
-     — добавление и удаление лайка, вывод 10 наиболее популярных фильмов
-     по количеству лайков. Пусть пока каждый пользователь может поставить
-     лайк фильму только один раз.
 
-     В этом примере используется Map с именем filmLikes, где ключом является
-      название фильма, а значением - множество пользователей, которые поставили лайк этому фильму.
-
-Метод addLike добавляет лайк фильму от пользователя. Он использует метод computeIfAbsent, чтобы
- гарантировать наличие множества пользователей для данного фильма в карте filmLikes, и затем добавляет
-  имя пользователя в это множество с помощью метода add.
-
-Метод removeLike удаляет лайк фильма от пользователя. Он проверяет наличие записи для данного
- фильма в карте filmLikes с помощью метода containsKey, и если запись существует, то удаляет имя
-  пользователя из множества с помощью метода remove.
-
-Метод getTopFilms возвращает список из n наиболее популярных фильмов по количеству лайков. Он
- создает список записей карты filmLikes, сортирует его по убыванию количества лайков с помощью
-  метода sort, и затем добавляет первые n фильмов в список topFilms, который возвращается в качестве результата.
-
-Этот код является лишь примером и может быть доработан и изменен в соответствии с требованиями.*/
     @Autowired
     private InMemoryFilmStorage inMemoryFilmStorage;
     @Autowired
@@ -42,13 +22,6 @@ public class FilmService {
     public void addFilm(Film film) {
         filmLikes.put(film.getId(), new HashSet<User>());
     }
-
-//    public void updateFilm(Film film) {
-//        int id = film.getId();
-//        Film filmToUpdate = inMemoryFilmStorage.getFilmById(id);
-//        Set<User> likesToUpdate = filmLikes.get(filmToUpdate);
-//        filmLikes.put(film.getId(), likesToUpdate);
-//    }
 
     public void addLike(int filmId, int userId) {
         Film film = inMemoryFilmStorage.getFilmById(filmId);
