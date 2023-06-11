@@ -6,9 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -107,8 +107,8 @@ class FilmorateApplicationTests {
         ResponseEntity<String> response = restTemplate.postForEntity("/users", user, String.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         try {
-            UserController userManagerTest = new UserController();
-            Field usersField = UserController.class.getDeclaredField("users");
+            InMemoryUserStorage userManagerTest = new InMemoryUserStorage();
+            Field usersField = InMemoryUserStorage.class.getDeclaredField("users");
             usersField.setAccessible(true);
             Map<Integer, User> users = (Map<Integer, User>) usersField.get(userManagerTest);
             assertEquals(users.get(user.getId()).getName(), "testuserLogin");
